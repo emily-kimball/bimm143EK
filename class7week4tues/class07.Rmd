@@ -75,7 +75,7 @@ both_na2 <- function(x, y) {if(length(x) != length(y)) {
 ```
 Testing out the function 
 ```{r}
-both_na2(x, y2)
+
 ```
 #do it yourself 
 ```{r}
@@ -114,7 +114,7 @@ apply(hw,1,grade)
 
 #Installing bioconductor 
 ```{r}
-install("dplyr")
+
 ```
 
 
