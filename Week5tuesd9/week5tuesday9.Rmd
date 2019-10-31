@@ -1,0 +1,142 @@
+---
+title: "Lect9week5tues"
+author: "Emily Kimball"
+date: "10/29/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#read.csv("WisconsinCancer.csv")
+# Save your input data file to a new 'data' directory
+
+# Complete the following code to input the data and store as wisc.df
+wisc.df=read.csv("WisconsinCancer.csv")
+head(wisc.df)
+```
+
+```{r}
+wisc.data <- as.matrix(wisc.df[,3:32])
+
+#naming rows 
+row.names(wisc.data) <- wisc.df$id
+
+head(wisc.data)
+
+diagnosis <- wisc.df$diagnosis
+
+```
+#making the disgnosis how many are maligement 
+```{r}
+table(wisc.df$diagnosis)
+```
+Q3. How many variables are suffixed with mean
+Grep with will group together (pattern, x, ...)
+```{r}
+grep("_mean",colnames(wisc.df))
+#how many --> we can use legnth to count the # of matches 
+length(grep("_mean",colnames(wisc.df)))
+
+```
+##PCA analysis 
+```{r}
+#check column means 
+colMeans(wisc.data)
+apply(wisc.data, 2, sd)
+```
+
+```{r}
+# we must set scale to true, becuase the data is affected by sigfigs
+wisc.comp <- prcomp(wisc.data, scale = TRUE)
+
+summary(wisc.comp)
+biplot(wisc.comp, scale = TRUE)
+
+#this plot is bad so we will try to make a dot plot 
+# Scatter plot observations by components 1 and 2
+
+plot(wisc.comp , col =  , 
+     xlab = "PC1", ylab = "PC2")
+```
+Making a Plot of PC1 and Pc2 based upon maligment or benign 
+```{r}
+plot(wisc.comp$x[,1], wisc.comp$x[,2], col=diagnosis)
+diagnosis
+```
+
+```{r}
+diagnosis
+```
+#varience explained 
+```{r}
+pr.var <- (wisc.comp)
+head(pr.var)
+```
+
+#Hierachal clustering
+```{r}
+ data.scaled <- scale(wisc.data)
+data.dist <- dist(data.scaled)
+wisc.hclust <- hclust(data.dist, method = "complete")
+
+
+#making the plot 
+plot(wisc.hclust)
+abline(, col="red", lty=2)
+```
+#that is a hard graph to read so lets try again 
+```{r}
+wisc.hclust.clusters <- cutree(wisc.hclust, 4)
+table(wisc.hclust.clusters, diagnosis)
+```
+
+```{r}
+wisc.km <- kmeans(wisc.hclust.clusters, centers= 2 , nstart= 20)
+table(wisc.km$cluster, diagnosis)
+```
+##Combining Methods Doing the new method 
+```{r}
+ newdata <- dist(wisc.comp$x[,1:7])
+hclusdata <- hclust(newdata, method ="ward.D2")
+plot(hclusdata)
+
+grps <- cutree(hclusdata, k = 2)
+table(grps)
+table(grps, diagnosis)
+```
+#Plotting this data to get a graph coloered by groups  
+```{r}
+plot(wisc.comp$x[,1:2], col=grps)
+```
+#reorganizing the data 
+```{r}
+g <- as.factor(grps)
+#relevel 
+g <- relevel(g, 2)
+#now we plot based on the new variable color 
+plot(wisc.comp$x[,1:2], col=g)
+```
+#Predictions 
+```{r}
+ new<- read.csv("new_samples.csv")
+```
+```{r}
+npc <- predict(wisc.comp, newdata=new)
+npc
+```
+#graphing the new data against the old 
+```{r}
+plot(wisc.comp$x[,1:2], col=g)
+points(npc[,1], npc[,2], col="blue", pch=16, cex=3)
+text(npc[,1], npc[,2], c(1,2), col="white")
+#The data on the grapph below is the predicted vs actual 
+```
+based upon the patients we should look at patient one more seriously 
+
+
+
+
+

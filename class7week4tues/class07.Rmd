@@ -1,0 +1,122 @@
+---
+title: "class7week4tues"
+author: "Emily Kimball"
+date: "10/22/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## R functions revisited 
+```{r}
+source("http://tinyurl.com/rescale-R")
+```
+
+
+```{r}
+rescale(1:10)
+```
+the function is already correct, becase we fixed them in the previous class
+```{r}
+rescale(c(1,10,5,NA,6))
+```
+
+practicing on rescale2  -> this is the result we want 
+```{r}
+rescale2(c(1:10, 3))
+```
+
+
+##more examples with functions 
+```{r}
+x <- c(1,2,NA,3,NA)
+y <- c(NA, 3, NA, 3, 4)
+
+#google for a function that might help to find where the NA elements in 2 input vectors 
+is.na(x)
+```
+```{r}
+which(is.na(x))
+```
+
+this gives us a value that combines our function and only gives one result
+THIS is my working snippet!!!
+```{r}
+sum(is.na(x) & is.na(y))
+```
+this shows that the sum will treat TRUE and FALSE as 1, 0
+```{r}
+sum(c(TRUE, FALSE, TRUE, TRUE, FALSE))
+```
+now turning this into a function
+```{r}
+both_na <- function(x, y) {sum(is.na(x) & is.na(y))}
+```
+testing out the functiton 
+```{r}
+both_na(x,y)
+```
+#idiot proofing the silly mistakes 
+```{r}
+x <- c(NA, NA, NA)
+y1 <- c( 1, NA, NA)
+y2 <- c( 1, NA, NA, NA)
+#testing in out
+both_na(x,y2)
+```
+Writing a function to heck 
+```{r}
+both_na2 <- function(x, y) {if(length(x) != length(y)) {
+  stop("vectors should be the same length")
+}
+  sum(is.na(x) & is.na(y))
+  }
+```
+Testing out the function 
+```{r}
+both_na2(x, y2)
+```
+#do it yourself 
+```{r}
+# student 1
+student1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
+# student 2
+student2 <- c(100, NA, 90, 90, 90, 90, 97, 80) 
+ #this is our snippet 
+mean(student1[-which.min(student1)], na.rm = TRUE)
+mean(student2[-which.min(student2)], na.rm = TRUE) 
+
+```
+We have our working code to turn into a function
+```{r}
+grade <- function(x) {
+   if(any(is.na(x))){
+       warning("Student is missing a homework grade")}
+  mean(x[-which.min(x)], na.rm = TRUE)
+ }
+print(grade)
+```
+```{r}
+grade(student1)
+grade(student2)
+```
+#Using the class data 
+```{r}
+url <-  "https://tinyurl.com/gradeinput"
+hw <- read.csv(url, row.names=1)
+```
+using apply
+```{r}
+apply(hw,1,grade)
+
+```
+
+#Installing bioconductor 
+```{r}
+install("dplyr")
+```
+
+
+
+
