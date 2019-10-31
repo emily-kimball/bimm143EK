@@ -1,2 +1,2 @@
-# bimm143EK
-Bimm 143 database of my work 
+# bioinformatics Class Fall 2019 
+This is my work from BIMM143 at UCSD 
