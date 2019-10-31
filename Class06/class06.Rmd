@@ -1,0 +1,112 @@
+---
+title: "Class06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# This is H1
+
+This is my work from Class 6 in **bimm 143.** 
+
+```{r}
+#this is the spce where we can demo a code chunk
+plot(1:10)
+```
+## Practice reading Files (Again...)
+```{r}
+read.csv("test1.txt")
+read.table("test2.txt" , sep = "$" , header = TRUE)
+read.table("test3.txt" , header = TRUE)
+
+# what is a function
+```
+
+
+```{r}
+add <- function(x, y = 1) { x + y}
+```
+```{r}
+add(1)
+add(5,5)
+# the function below adds to all of the function
+add( c(1, 2, 3))
+
+```
+new function to rescale data 
+```{r}
+rescale <- function(x) {
+ rng <-range(x)
+ (x - rng[1]) / (rng[2] - rng[1])
+}
+
+```
+
+
+```{r}
+rescale(1:10)
+```
+resaling functions and using NA
+```{r}
+rescale2 <- function(x) {rng <- range(x, na.rm = TRUE)
+(x - rng[1]) / (rng[2] - rng[1])
+}
+
+```
+
+```{r}
+rescale2(c(1,2,NA,3,10))
+```
+
+```{r}
+rescale3 <- function(x, na.rm=TRUE, plot=FALSE) {
+ rng <-range(x, na.rm=na.rm)
+ print("Hello")
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ 
+ print("is it me you are looking for?")
+ if(plot) {
+ plot(answer, typ="b", lwd=4)
+   return(answer)
+ }
+ print("I can see it in ...")
+ return(answer)
+}
+```
+```{r}
+rescale3(1:10)
+```
+
+
+
+Start of the Homework
+```{r}
+#install.packages("bio3d")
+# Can you improve this analysis code?
+library(bio3d)
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s3, chain="A", elety="CA")
+
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+Homework function to generalize our data 
+```{r}
+
+```
+
+
+
+
+
