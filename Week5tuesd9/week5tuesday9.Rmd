@@ -2,7 +2,7 @@
 title: "Lect9week5tues"
 author: "Emily Kimball"
 date: "10/29/2019"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
