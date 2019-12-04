@@ -1,0 +1,60 @@
+---
+title: "CLass 11: Structural Bioinformatics 1"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The PDB database for biomolecular structures
+>Q1: Download a CSV file from the PDB site (accessible from “Analyze” -> “PDB Statistics” >
+“by Experimental Method and Molecular Type”. Move this CSV file into your RStudio project
+and determine the percentage of structures solved by X-Ray and Electron Microscopy. Also can
+you determine what proportion of structures are protein? Aim to have a rendered GitHub
+document with working code that yields your answers.
+
+```{r}
+read.csv("Data Export Summary.csv")
+data <- read.csv("Data Export Summary.csv")
+#answer the question 
+#Total entries 
+ total <- sum(data$Total)
+ #% xray vs mircroscope
+data$Total/total *100
+
+##proportion protien 
+round( data$Proteins/(sum(data$Proteins))* 100, 2 )
+
+```
+```{r}
+#section 4.2 on the inclass lab 
+library(bio3d)
+ hsg <- read.pdb("1hsg (1).pdb")
+whsg <- write.pdb(read.pdb("1hsg (1).pdb"))
+ ca.inds <- atom.select(hsg, "calpha")
+#print details of the first selected atoms 
+head( hsg$atom[ca.inds$atom, ] )
+```
+
+```{r}
+# Select chain A
+a.inds <- atom.select(hsg, chain="A")
+# Select C-alphas of chain A
+ca.inds <- atom.select(hsg, "calpha", chain="A")
+# We can combine multiple selection criteria to return their
+#intersection
+cab.inds <- atom.select(hsg, elety=c("CA","CB"), chain="A",
+resno=10:20)
+```
+
+
+
+> showing how you can select different aspects 
+
+```{r}
+ligand <- atom.select( hsg, "ligand", value = TRUE)
+write.pdb(ligand, file = "1hsg (1).pdb")
+```
+
+
