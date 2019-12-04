@@ -1,0 +1,200 @@
+---
+title: "Class15week7thurs"
+author: "Emily Kimball"
+date: "11/14/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##import count and metadata 
+```{r}
+metafile <- "GSE37704_metadata.csv"
+countfile <- "GSE37704_featurecounts.csv"
+```
+#import meta data and take a peak
+```{r}
+colData = read.csv(metafile, row.names=1)
+head(colData)
+
+countData = read.csv(countfile, row.names=1)
+head(countData)
+```
+#remove the column 
+```{r}
+countData <- as.matrix(countData[, -1])
+head(countData)
+```
+#matching up the data making sure that the things are lined up correctly
+```{r}
+colnames(countData)
+rownames(colData)
+#this shows that all of the values are matching up with eachother
+all(colnames(countData) == rownames(colData))
+```
+
+#Filter out the data that has 0 as a result so remove any data with zeros 
+```{r}
+
+countData = countData[ rowSums(countData) > 0,]
+head(countData)
+
+
+```
+Load the data library 
+```{r}
+library(DESeq2)
+```
+
+```{r}
+#Setup the object with our data in the way DEseq wants it 
+
+dds = DESeqDataSetFromMatrix(countData=countData,
+                             colData=colData,
+                             design=~condition)
+#Run the analysis 
+dds = DESeq(dds)
+```
+#getting the results 
+```{r}
+res = results(dds)
+res
+```
+#plot the results 
+```{r}
+plot(res$log2FoldChange, -log(res$padj))
+
+#making a color vector 
+mycols <- rep("grey", nrow(res))
+#Making red color 
+"red" <- mycols[abs(res$log2FoldChange > 2)]
+#making blue for p value less than 0.01 
+inds <- mycols[abs(res$padj < 0.01)] & mycols[abs(res$log2FoldChange) > 2]
+"blue" <- mycols[inds]
+
+plot(res$log2FoldChange, -log(res$padj), col=, xlab="Log2(FoldChange)", ylab="-Log(P-value)" ))
+
+```
+#gene annotation 
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+
+#we can translate between all of the following database ID systems 
+columns(org.Hs.eg.db)
+
+res$symbol = mapIds(org.Hs.eg.db,
+                    keys=row.names(countData),     #where are my IDs
+                    keytype="ENSEMBL",              #what format are my IDs
+                    column="SYMBOL",                # the new format I want 
+                    multiVals="first")
+
+res$entrez = mapIds(org.Hs.eg.db,
+                    keys= row.names(countData),
+                    keytype="ENSEMBL",
+                    column="ENTREZID",
+                    multiVals="first")
+
+res$name =   mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column="GENENAME",
+                    multiVals="first")
+
+head(res, 10)
+```
+##Pathway analysis
+Here we are going to use the gage package and pathway pachage to draw pathway diagrams 
+```{r}
+library(pathview)
+library(gage)
+library(gageData)
+
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+Making a litte vector
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+
+# Get the results in the gage pathway
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+```
+#look at the results returned from gage
+
+```{r}
+attributes(keggres)
+
+#heading the data 
+head(keggres$greater)
+head(keggres$less)
+```
+
+#Now trying out the pathway package 
+```{r}
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+A different way to get a result 
+```{r}
+# A different PDF based output of the same data
+pathview(gene.data=foldchanges, pathway.id="hsa04110", kegg.native=FALSE)
+```
+#focusing on frewer pathways 
+```{r}
+## Focus on top 5 upregulated pathways here for demo purposes only
+keggrespathways <- rownames(keggres$greater)[1:5]
+
+# Extract the 8 character long IDs part of each string
+keggresids = substr(keggrespathways, start=1, stop=8)
+keggresids
+
+#this function makes the graphs 
+pathview(gene.data=foldchanges, pathway.id=keggresids, species="hsa")
+```
+#Doing the same thing for the downregulated pathways 
+```{r}
+downreg <- rownames(keggres$less)[1:5]
+keggresids = substr(downreg, start = 1, stop = 8)
+pathview(gene.data = foldchanges, pathway.id = keggresids, species = "hsa")
+```
+
+#Doing the same thing but for gene ontology 
+```{r}
+data(go.sets.hs)
+data(go.subs.hs)
+
+# Focus on Biological Process subset of GO
+gobpsets = go.sets.hs[go.subs.hs$BP]
+
+gobpres = gage(foldchanges, gsets=gobpsets, same.dir=TRUE)
+
+lapply(gobpres, head)
+```
+
+#Part 4:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
