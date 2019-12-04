@@ -1,0 +1,96 @@
+---
+title: "class17"
+author: "Emily Kimball"
+date: "11/26/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(GenomicDataCommons)
+library(TCGAbiolinks)
+library(maftools)
+status()
+```
+#Getting the data 
+```{r}
+projects <- getGDCprojects()
+head(projects)
+
+```
+#starting to chain together the data. %>% is like a chain or nesting 
+```{r}
+cases_by_project <- cases() %>%
+  facet("project.project_id") %>%
+  aggregations()
+head(cases_by_project)
+```
+
+#rep function replicates the data 
+
+```{r}
+
+
+x <- cases_by_project$project.project_id
+#making a color vector 
+colvec <- rep("lightblue", nrow(x))
+colvec[ (x$key == "TCGA-PAAD")] <- "red"
+colvec
+
+#time to plot the data needs to be x$docount, becuase that is where the colum is with the data located, for names.arg you need to give it X, so chain it together with the column where it is located.
+barplot( x$doc_count, names.arg = x$key  ,  log = "y", col = colvec, las = 2)
+```
+#now using the file summary of TGGA biolinks 
+```{r}
+samp <- getSampleFilesSummary("TCGA-PAAD")
+head(samp)
+```
+#working on Part 2: Designing a Cancer Vaccine 
+```{r}
+#read in the fasta sequences 
+library(bio3d)
+seqs <- read.fasta("lecture18_sequences (1).fa")
+#read the sequences through MUSCLE, then alligned in seaview and read in
+ seq <- read.fasta("allignedseq")
+```
+
+```{r}
+ide <- conserv(seq$ali, method = "identity")
+ide
+mutant.sites <- which( ide <1)
+mutant.sites
+```
+#Keep gaps from being included in the analysis of allignment 
+```{r}
+gaps <- gap.inspect(seq)
+mutant.sites <- mutant.sites[mutant.sites %in% gaps$f.inds]
+mutant.sites
+#this shows the non identical sites which do not contains the gaps 
+```
+
+```{r}
+## Make a "names" label for our output sequences (one per mutant)
+mutant.names <- paste0(seqs$ali["P53_wt",mutant.sites],
+                       mutant.sites,
+                       seqs$ali["P53_mutant",mutant.sites])
+mutant.names
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
